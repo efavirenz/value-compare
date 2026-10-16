@@ -12,7 +12,8 @@ const base = process.env.VITE_BASE ?? '/value-compare/';
 export default defineConfig({
   base,
   define: {
-    __APP_VERSION__: JSON.stringify(pkg.version),
+    // Shown in the badge as major.minor only (1.1.0 -> "1.1").
+    __APP_VERSION__: JSON.stringify(pkg.version.split('.').slice(0, 2).join('.')),
   },
   plugins: [
     react(),

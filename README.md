@@ -25,7 +25,7 @@ set `VITE_BASE=/your-repo-name/` for the build, or edit the default in `vite.con
 
 ## Releasing a new version
 
-- Bump `version` in `package.json` (shown in the top-right badge).
+- Bump `version` in `package.json`. The top-right badge shows major.minor only (`1.1.0` is shown as `v1.1`), so raise the minor number for releases users should see.
 - After deploying, tapping the version badge in the installed app checks for a new service worker
   and reloads into the latest version. If none exists it shows "You are on the latest version".
 

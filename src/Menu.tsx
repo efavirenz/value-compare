@@ -55,7 +55,7 @@ export default function Menu({ t, lang, theme, onLang, onTheme, onClose }: MenuP
           <h2>{t.settings}</h2>
           <button ref={closeRef} type="button" className="icon-btn small" aria-label={t.close} onClick={onClose}>
             <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-              <path d="M5 5l14 14M19 5L5 19" stroke="currentColor" strokeWidth="3" strokeLinecap="round" fill="none" />
+              <path d="M5 5l14 14M19 5L5 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
             </svg>
           </button>
         </div>

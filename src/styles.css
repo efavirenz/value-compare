@@ -1,6 +1,5 @@
 :root {
-  --bw: 3px;
-  --radius: 12px;
+  --radius: 14px;
   /* Theme colors are injected at runtime by applyTheme(); these are the Paper fallbacks. */
   --bg: #ffffff;
   --surface: #ffffff;
@@ -15,6 +14,15 @@
   --best: #0e8a45;
   --onBest: #ffffff;
   --bestSoft: #d8f5e4;
+  --border: var(--line);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Softer hairline borders where color-mix is supported (iOS 16.2+, all current browsers). */
+@supports (color: color-mix(in srgb, red, blue)) {
+  :root {
+    --border: color-mix(in srgb, var(--line) 28%, transparent);
+  }
 }
 
 *,
@@ -34,13 +42,22 @@ body {
   color: var(--text);
   font-family: system-ui, -apple-system, 'Segoe UI', 'Noto Sans Thai', Thonburi, 'Sarabun', sans-serif;
   font-size: 18px;
+  font-weight: 400;
   line-height: 1.3;
   -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 400;
 }
 
 button,
 input {
   font: inherit;
+  font-weight: 400;
   color: inherit;
 }
 
@@ -50,7 +67,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--text);
+  outline: 2px solid var(--text);
   outline-offset: 2px;
 }
 
@@ -69,14 +86,15 @@ button {
 }
 
 .icon-btn {
-  width: 48px;
-  height: 48px;
+  width: 46px;
+  height: 46px;
   padding: 0;
   display: grid;
   place-items: center;
-  border: var(--bw) solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-radius: 14px;
   background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .icon-btn.small {
@@ -86,13 +104,13 @@ button {
 
 .version {
   position: relative;
-  min-height: 40px;
-  padding: 0 16px;
-  border: 2px solid var(--line);
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
   border-radius: 999px;
   background: var(--surface);
-  font-weight: 800;
-  font-size: 1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -102,10 +120,10 @@ button {
 
 .version .dot {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 14px;
-  height: 14px;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: var(--best);
   border: 2px solid var(--bg);
@@ -120,13 +138,13 @@ button {
 }
 
 .cols.head {
-  margin: 22px 0 8px;
+  margin: 24px 0 8px;
 }
 
 .colhead {
   text-align: center;
-  font-weight: 800;
-  font-size: 1.25rem;
+  font-size: 1.05rem;
+  color: var(--muted);
 }
 
 .rows {
@@ -135,30 +153,38 @@ button {
 }
 
 .label {
-  text-align: center;
-  font-weight: 800;
-  font-size: 1.6rem;
-  line-height: 2;
-  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--soft);
+  font-size: 1.1rem;
 }
 
 .field {
   width: 100%;
   min-width: 0;
   height: 3rem;
-  padding: 0 8px;
-  border: var(--bw) solid var(--line);
-  border-radius: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
   background: var(--surface);
   text-align: center;
   font-size: 1.25rem;
-  font-weight: 700;
   font-variant-numeric: tabular-nums;
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
 }
 
 .del {
-  width: 2.6rem;
-  height: 2.6rem;
+  width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
   display: grid;
   place-items: center;
@@ -166,6 +192,14 @@ button {
   border-radius: 50%;
   background: var(--del);
   color: var(--onDel);
+  transition: transform 0.12s;
+}
+
+@supports (color: color-mix(in srgb, red, blue)) {
+  .del {
+    background: color-mix(in srgb, var(--del) 16%, var(--surface));
+    color: var(--del);
+  }
 }
 
 .del:active,
@@ -182,25 +216,27 @@ button {
 .row.is-best .field {
   border-color: var(--best);
   background: var(--bestSoft);
-  box-shadow: 0 0 0 2px var(--best);
+  box-shadow: 0 0 0 1px var(--best);
 }
 
 /* ---- unit toggle -------------------------------------------------------------------------- */
 .seg {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: 2.4rem;
-  border: 2px solid var(--line);
+  height: 2.25rem;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border);
   border-radius: 999px;
-  overflow: hidden;
   background: var(--surface);
 }
 
 .seg button {
   border: 0;
+  border-radius: 999px;
   background: transparent;
-  font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  color: var(--muted);
 }
 
 .seg button[aria-checked='true'] {
@@ -209,26 +245,28 @@ button {
 }
 
 .seg.wide {
-  height: 3rem;
+  height: 2.75rem;
 }
 
 /* ---- actions ------------------------------------------------------------------------------ */
 .actions {
   display: flex;
   justify-content: center;
-  gap: 18px;
-  margin: 24px 0 0;
+  gap: 14px;
+  margin: 26px 0 0;
 }
 
 .pill {
-  min-width: 7.2rem;
-  height: 3.25rem;
-  padding: 0 22px;
-  border: var(--bw) solid var(--line);
+  min-width: 7rem;
+  height: 3rem;
+  padding: 0 26px;
+  border: 0;
   border-radius: 999px;
-  background: var(--surface);
-  font-size: 1.4rem;
-  font-weight: 800;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 1.1rem;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s, opacity 0.12s;
 }
 
 .pill.clear {
@@ -236,25 +274,31 @@ button {
   color: var(--onClear);
 }
 
+@supports (color: color-mix(in srgb, red, blue)) {
+  .pill.clear {
+    background: color-mix(in srgb, var(--clear) 55%, var(--surface));
+    color: var(--text);
+  }
+}
+
 .pill:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
 /* ---- result ------------------------------------------------------------------------------- */
 .result {
   min-width: 0;
-  margin: 26px 0 0;
+  margin: 28px 0 0;
   padding: 2px 8px 12px;
-  border: var(--bw) solid var(--line);
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
 }
 
 .result legend {
-  padding: 0 6px;
-  font-size: 1.4rem;
-  font-weight: 800;
-  text-decoration: underline;
+  padding: 0 8px;
+  font-size: 1.2rem;
 }
 
 .table-wrap {
@@ -272,14 +316,13 @@ th {
   padding: 2px 4px;
   text-align: right;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--muted);
 }
 
 th small {
   display: block;
   font-size: 0.7rem;
-  font-weight: 600;
 }
 
 td {
@@ -295,17 +338,16 @@ td:nth-child(-n + 2) {
 }
 
 td:first-child {
-  border-radius: 8px 0 0 8px;
+  border-radius: 10px 0 0 10px;
 }
 
 td:last-child {
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 10px 10px 0;
 }
 
 tr.best td {
   background: var(--best);
   color: var(--onBest);
-  font-weight: 800;
 }
 
 /* ---- toast -------------------------------------------------------------------------------- */
@@ -318,12 +360,12 @@ tr.best td {
   align-items: center;
   gap: 14px;
   max-width: min(92vw, 440px);
-  padding: 12px 16px;
-  border-radius: var(--radius);
+  padding: 12px 18px;
+  border-radius: 999px;
   background: var(--text);
   color: var(--bg);
-  font-weight: 700;
   font-size: 1rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   transform: translateX(-50%);
   animation: toast-in 0.18s ease-out;
 }
@@ -334,8 +376,8 @@ tr.best td {
   border: 0;
   background: transparent;
   color: inherit;
-  font-weight: 800;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @keyframes toast-in {
@@ -350,7 +392,7 @@ tr.best td {
   position: fixed;
   inset: 0;
   z-index: 20;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .drawer {
@@ -361,7 +403,7 @@ tr.best td {
   width: min(88vw, 340px);
   padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 24px);
   overflow-y: auto;
-  border-right: var(--bw) solid var(--line);
+  border-right: 1px solid var(--border);
   background: var(--bg);
   animation: drawer-in 0.2s ease-out;
 }
@@ -385,8 +427,8 @@ tr.best td {
 }
 
 .drawer h3 {
-  margin: 20px 0 8px;
-  font-size: 1.1rem;
+  margin: 22px 0 8px;
+  font-size: 1.05rem;
 }
 
 .drawer h4 {
@@ -407,15 +449,14 @@ tr.best td {
   padding: 8px;
   text-align: left;
   font-size: 0.95rem;
-  font-weight: 700;
-  border: 2px solid var(--line);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
 }
 
 .theme-btn[aria-checked='true'] {
-  outline: 3px solid var(--text);
-  outline-offset: 2px;
+  border-color: var(--text);
+  box-shadow: 0 0 0 1px var(--text);
 }
 
 .swatch {
@@ -423,7 +464,7 @@ tr.best td {
   gap: 4px;
   height: 30px;
   padding: 6px;
-  border: 2px solid;
+  border: 1px solid;
   border-radius: 8px;
 }
 
@@ -436,6 +477,11 @@ tr.best td {
   .toast,
   .drawer {
     animation: none;
+  }
+  .field,
+  .pill,
+  .del {
+    transition: none;
   }
   .del:active,
   .pill:active {
