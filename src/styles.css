@@ -11,7 +11,7 @@
   --onClear: #111111;
   --del: #d63e4c;
   --onDel: #ffffff;
-  --best: #0e8a45;
+  --best: #0b753a;
   --onBest: #ffffff;
   --bestSoft: #d8f5e4;
   --border: var(--line);
@@ -75,8 +75,12 @@ button {
 .page {
   max-width: 480px;
   margin: 0 auto;
+  min-height: 100vh;
   min-height: 100dvh;
-  padding: calc(env(safe-area-inset-top, 0px) + 12px) 18px calc(env(safe-area-inset-bottom, 0px) + 110px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 12px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 110px);
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
 }
 
 .topbar {
@@ -98,13 +102,15 @@ button {
 }
 
 .icon-btn.small {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
 }
 
 .version {
   position: relative;
-  min-height: 36px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   padding: 0 14px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -183,8 +189,8 @@ button {
 }
 
 .del {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
   display: grid;
   place-items: center;
@@ -223,7 +229,7 @@ button {
 .seg {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: 2.25rem;
+  height: 2.75rem;
   padding: 3px;
   gap: 2px;
   border: 1px solid var(--border);
@@ -239,7 +245,8 @@ button {
   color: var(--muted);
 }
 
-.seg button[aria-checked='true'] {
+.seg button[aria-checked='true'],
+.seg button[aria-pressed='true'] {
   background: var(--text);
   color: var(--bg);
 }
@@ -370,9 +377,27 @@ tr.best td {
   animation: toast-in 0.18s ease-out;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.toast.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .toast button {
-  min-height: 36px;
-  padding: 0 4px;
+  min-height: 44px;
+  padding: 0 10px;
   border: 0;
   background: transparent;
   color: inherit;
@@ -401,7 +426,10 @@ tr.best td {
   bottom: 0;
   left: 0;
   width: min(88vw, 340px);
-  padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px);
+  padding-left: max(18px, env(safe-area-inset-left, 0px));
+  padding-right: max(18px, env(safe-area-inset-right, 0px));
   overflow-y: auto;
   border-right: 1px solid var(--border);
   background: var(--bg);

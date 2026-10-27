@@ -23,11 +23,33 @@ export interface RankedItem {
   pct: number;
 }
 
-/** Keep only digits 0-9 and a single decimal point. */
+/** Keep only digits 0-9 and a single decimal point, converting Thai numerals and smart-normalizing decimal commas. */
 export function sanitizeNumber(raw: string): string {
+  // Convert Thai digits (๐-๙) to ASCII (0-9)
+  let normalized = '';
+  for (const ch of raw) {
+    if (ch >= '\u0E50' && ch <= '\u0E59') {
+      normalized += String.fromCharCode(ch.charCodeAt(0) - 0x0E50 + 48);
+    } else {
+      normalized += ch;
+    }
+  }
+
+  // Handle commas: preserve standard thousands separators; normalize lone decimal commas
+  if (normalized.includes('.')) {
+    normalized = normalized.replace(/,/g, '');
+  } else if (/^\d{1,3}(,\d{3})+$/.test(normalized.trim())) {
+    normalized = normalized.replace(/,/g, '');
+  } else {
+    const commaCount = (normalized.match(/,/g) || []).length;
+    if (commaCount === 1) {
+      normalized = normalized.replace(',', '.');
+    }
+  }
+
   let out = '';
   let seenDot = false;
-  for (const ch of raw) {
+  for (const ch of normalized) {
     if (ch >= '0' && ch <= '9') {
       out += ch;
     } else if (ch === '.' && !seenDot) {
@@ -84,9 +106,10 @@ export function rankItems(rows: RowData[]): RankedItem[] {
   });
   if (items.length < 2) return [];
 
-  items.sort((a, b) =>
-    nearlyEqual(a.unitPrice, b.unitPrice) ? a.index - b.index : a.unitPrice - b.unitPrice,
-  );
+  items.sort((a, b) => {
+    const diff = a.unitPrice - b.unitPrice;
+    return diff !== 0 ? diff : a.index - b.index;
+  });
 
   const best = items[0].unitPrice;
   let groupStart = 0;
@@ -123,6 +146,13 @@ export function chooseDecimals(values: number[]): number {
 }
 
 export function formatUnitPrice(value: number, decimals: number): string {
+  if (!Number.isFinite(value)) return '0.00';
+  if (value >= 1e21) {
+    return value.toLocaleString('en-US', {
+      maximumFractionDigits: decimals,
+      useGrouping: false,
+    });
+  }
   return value.toFixed(decimals);
 }
 

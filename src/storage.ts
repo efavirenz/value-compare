@@ -47,10 +47,12 @@ export function loadState(): PersistedState {
   }
 }
 
-export function saveState(state: PersistedState): void {
+export function saveState(state: PersistedState): boolean {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
+    return true;
   } catch {
     // Storage may be unavailable (private mode / quota). The app keeps working in memory.
+    return false;
   }
 }

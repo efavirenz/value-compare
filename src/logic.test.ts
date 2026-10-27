@@ -10,11 +10,20 @@ import {
 } from './logic';
 
 describe('sanitizeNumber', () => {
-  it('keeps digits and a single dot only', () => {
-    expect(sanitizeNumber('12a,5')).toBe('125');
+  it('normalizes decimal comma and keeps thousands separators', () => {
+    expect(sanitizeNumber('1,5')).toBe('1.5');
+    expect(sanitizeNumber('1,50')).toBe('1.50');
+    expect(sanitizeNumber('1,')).toBe('1.');
+    expect(sanitizeNumber('1,000')).toBe('1000');
+    expect(sanitizeNumber('1,250.50')).toBe('1250.50');
     expect(sanitizeNumber('1.2.3')).toBe('1.23');
     expect(sanitizeNumber('١٢abc.5')).toBe('.5');
-    expect(sanitizeNumber('1,000')).toBe('1000');
+  });
+
+  it('converts Thai numerals to Arabic digits', () => {
+    expect(sanitizeNumber('๑๒.๕')).toBe('12.5');
+    expect(sanitizeNumber('๑,๐๐๐')).toBe('1000');
+    expect(sanitizeNumber('๒๕๐')).toBe('250');
   });
 });
 
@@ -110,5 +119,9 @@ describe('formatting', () => {
     expect(formatPercent(6.6667)).toBe('+6.7%');
     expect(formatPercent(5)).toBe('+5%');
     expect(formatPercent(33.33)).toBe('+33%');
+  });
+
+  it('avoids scientific notation for extreme numbers', () => {
+    expect(formatUnitPrice(1e22, 2)).not.toContain('e');
   });
 });

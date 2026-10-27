@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import App from './App';
@@ -17,11 +17,15 @@ beforeEach(() => localStorage.clear());
 afterEach(() => cleanup());
 
 describe('App', () => {
-  it('accepts only digits and a dot', async () => {
+  it('accepts only digits and a dot, normalizing decimal comma', async () => {
     const user = userEvent.setup();
     render(<App initial={defaultState()} />);
-    await user.type(price('A'), '1a,2.3.4-5 ');
+    await user.type(price('A'), '1a#2.3.4-5 ');
     expect(price('A').value).toBe('12.345');
+
+    await user.clear(price('A'));
+    await user.type(price('A'), '1,5');
+    expect(price('A').value).toBe('1.5');
   });
 
   it('shows the Result table only with two complete items and highlights rank 1', async () => {
@@ -76,6 +80,17 @@ describe('App', () => {
     expect(qty('B').value).toBe('');
     expect(document.activeElement).toBe(price('B'));
     expect(screen.getByText('Item B deleted')).toBeTruthy();
+  });
+
+  it('deleting row C when 3 rows exist removes row C, even if C is empty', async () => {
+    const user = userEvent.setup();
+    render(<App initial={defaultState()} />);
+    await user.click(screen.getByRole('button', { name: 'Add' }));
+    expect(screen.getByLabelText('Price of item C')).toBeTruthy();
+
+    // Row C is currently empty; delete it
+    await user.click(screen.getByRole('button', { name: 'Delete item C' }));
+    expect(screen.queryByLabelText('Price of item C')).toBeNull();
   });
 
   it('deleting A when only A and B exist keeps two rows', async () => {
@@ -143,5 +158,54 @@ describe('App', () => {
     const dialog = screen.getByRole('dialog');
     const radios = within(dialog).getAllByRole('radio');
     expect(radios).toHaveLength(2 + 10); // EN/TH + 10 themes
+  });
+
+  it('keeps focus on selected theme button after clicking it in Menu (F-003)', async () => {
+    const user = userEvent.setup();
+    render(<App initial={defaultState()} />);
+    await user.click(screen.getByRole('button', { name: 'Menu' }));
+    const midnightBtn = screen.getByRole('radio', { name: /Midnight|เที่ยงคืน/ });
+    await user.click(midnightBtn);
+    expect(document.activeElement).toBe(midnightBtn);
+  });
+
+  it('synchronizes state when receiving storage event from another tab (F-013)', async () => {
+    render(<App initial={defaultState()} />);
+    expect(price('A').value).toBe('');
+
+    const updated = {
+      ...defaultState(),
+      rows: [
+        { price: '99', qty: '10' },
+        { price: '199', qty: '20' },
+      ],
+    };
+    localStorage.setItem('value-compare:state:v1', JSON.stringify(updated));
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'value-compare:state:v1',
+          newValue: JSON.stringify(updated),
+        }),
+      );
+    });
+
+    expect(price('A').value).toBe('99');
+    expect(price('B').value).toBe('199');
+  });
+
+  it('navigates themes with arrow keys in Menu (F-004)', async () => {
+    const user = userEvent.setup();
+    render(<App initial={defaultState()} />);
+    await user.click(screen.getByRole('button', { name: 'Menu' }));
+    const paperBtn = screen.getByRole('radio', { name: /Paper|กระดาษ/ });
+    paperBtn.focus();
+    expect(document.activeElement).toBe(paperBtn);
+
+    await user.keyboard('{ArrowDown}');
+    const mintBtn = screen.getByRole('radio', { name: /Mint|มิ้นต์/ });
+    expect(document.activeElement).toBe(mintBtn);
+    expect(mintBtn.getAttribute('aria-checked')).toBe('true');
   });
 });

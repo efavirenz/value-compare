@@ -32,7 +32,7 @@ export const themes: Theme[] = [
   {
     id: 'paper', dark: false, name: { en: 'Paper', th: 'กระดาษ' },
     vars: { bg: '#ffffff', surface: '#ffffff', text: '#111111', muted: '#595959', line: '#111111', soft: '#f1f1f1',
-      clear: '#f2838c', onClear: '#111111', ...LIGHT_DEL, best: '#0e8a45', onBest: '#ffffff', bestSoft: '#d8f5e4' },
+      clear: '#f2838c', onClear: '#111111', ...LIGHT_DEL, best: '#0b753a', onBest: '#ffffff', bestSoft: '#d8f5e4' },
   },
   {
     id: 'mint', dark: false, name: { en: 'Mint', th: 'มิ้นต์' },
@@ -72,7 +72,7 @@ export const themes: Theme[] = [
   {
     id: 'plum', dark: true, name: { en: 'Plum', th: 'ลูกพลัม' },
     vars: { bg: '#1a1122', surface: '#261933', text: '#f3e8fb', muted: '#b79fcf', line: '#b58be0', soft: '#31204a',
-      clear: '#ef8fb0', onClear: '#260a17', ...DARK_DEL, best: '#5eead4', onBest: '#052a25', bestSoft: '#124a45' },
+      clear: '#e880a4', onClear: '#260a17', ...DARK_DEL, best: '#5eead4', onBest: '#052a25', bestSoft: '#124a45' },
   },
   {
     id: 'ember', dark: true, name: { en: 'Ember', th: 'ถ่านไฟ' },

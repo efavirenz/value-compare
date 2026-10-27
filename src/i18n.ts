@@ -30,6 +30,10 @@ export interface Strings {
   priceOf: (label: string) => string;
   qtyOf: (label: string, unit: string) => string;
   versionAria: (version: string) => string;
+  versionAriaUpdate: (version: string) => string;
+  storageFailed: string;
+  errorBoundaryTitle: string;
+  errorBoundaryReset: string;
   maxItems: string;
 }
 
@@ -64,6 +68,10 @@ export const strings: Record<Lang, Strings> = {
     priceOf: (label) => `Price of item ${label}`,
     qtyOf: (label, unit) => `Amount in ${unit} of item ${label}`,
     versionAria: (version) => `Version ${version}. Tap to check for updates`,
+    versionAriaUpdate: (version) => `Version ${version}. Update available, tap to activate`,
+    storageFailed: 'Could not save data. Changes are kept in memory only.',
+    errorBoundaryTitle: 'Something went wrong',
+    errorBoundaryReset: 'Reset App',
     maxItems: 'Maximum 10 items',
   },
   th: {
@@ -96,6 +104,10 @@ export const strings: Record<Lang, Strings> = {
     priceOf: (label) => `ราคาสินค้า ${label}`,
     qtyOf: (label, unit) => `ปริมาณ (${unit}) ของสินค้า ${label}`,
     versionAria: (version) => `เวอร์ชัน ${version} กดเพื่อตรวจสอบการอัปเดต`,
+    versionAriaUpdate: (version) => `เวอร์ชัน ${version} มีอัปเดตใหม่ กดเพื่อเริ่มใช้งาน`,
+    storageFailed: 'ไม่สามารถบันทึกข้อมูลได้ ข้อมูลจะเก็บอยู่ในความจำชั่วคราวเท่านั้น',
+    errorBoundaryTitle: 'เกิดข้อผิดพลาดบางอย่าง',
+    errorBoundaryReset: 'รีเซ็ตแอป',
     maxItems: 'สูงสุด 10 สินค้า',
   },
 };

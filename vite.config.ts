@@ -20,8 +20,9 @@ export default defineConfig({
     VitePWA({
       // 'prompt': a new service worker waits until the user taps the version badge.
       registerType: 'prompt',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeManifestIcons: false,
       manifest: {
+        id: base,
         name: 'Value Compare',
         short_name: 'Value Compare',
         description: 'Compare unit prices to find which product is the better value.',
@@ -39,7 +40,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         cleanupOutdatedCaches: true,
       },
     }),

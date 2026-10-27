@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import Menu from './Menu';
 import { strings, type Lang } from './i18n';
@@ -14,7 +14,7 @@ import {
   type RowData,
   type Unit,
 } from './logic';
-import { saveState, type PersistedState } from './storage';
+import { loadState, saveState, type PersistedState } from './storage';
 import { applyTheme, type ThemeId } from './themes';
 
 interface Row extends RowData {
@@ -90,6 +90,7 @@ export default function App({ initial }: { initial: PersistedState }) {
   const menuBtnRef = useRef<HTMLButtonElement>(null);
   const toastSeq = useRef(0);
   const registration = useRef<ServiceWorkerRegistration | undefined>(undefined);
+  const storageWarned = useRef(false);
 
   const {
     offlineReady: [offlineReady, setOfflineReady],
@@ -103,8 +104,27 @@ export default function App({ initial }: { initial: PersistedState }) {
 
   // ---- persistence & presentation -------------------------------------------------------------
   useEffect(() => {
-    saveState({ rows: rows.map(({ price, qty }) => ({ price, qty })), unit, lang, theme });
-  }, [rows, unit, lang, theme]);
+    const success = saveState({ rows: rows.map(({ price, qty }) => ({ price, qty })), unit, lang, theme });
+    if (!success && !storageWarned.current) {
+      storageWarned.current = true;
+      showToast(t.storageFailed, 5000);
+    }
+  }, [rows, unit, lang, theme, t.storageFailed]);
+
+  // Synchronize state across multiple browser tabs (F-013)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'value-compare:state:v1') {
+        const latest = loadState();
+        setRows(latest.rows.map((r) => makeRow(r)));
+        setUnit(latest.unit);
+        setLang(latest.lang);
+        setTheme(latest.theme);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -141,13 +161,11 @@ export default function App({ initial }: { initial: PersistedState }) {
       showToast(t.offlineReady, INFO_MS);
       setOfflineReady(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [offlineReady]);
+  }, [offlineReady, t.offlineReady]);
 
   useEffect(() => {
     if (needRefresh) showToast(t.updateAvailable, 5000);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needRefresh]);
+  }, [needRefresh, t.updateAvailable]);
 
   const onVersionTap = async () => {
     if (checking) return;
@@ -156,9 +174,17 @@ export default function App({ initial }: { initial: PersistedState }) {
       await updateServiceWorker(true);
       return;
     }
-    const reg = registration.current;
+    let reg = registration.current;
+    if (!reg && 'serviceWorker' in navigator) {
+      try {
+        reg = (await navigator.serviceWorker.getRegistration()) ?? undefined;
+        if (reg) registration.current = reg;
+      } catch {
+        // SW registration lookup failed
+      }
+    }
     if (!reg) {
-      showToast(t.latest, INFO_MS);
+      showToast(t.checkFailed, INFO_MS);
       return;
     }
     setChecking(true);
@@ -223,8 +249,8 @@ export default function App({ initial }: { initial: PersistedState }) {
     if (!target) return;
     const isLast = index === rows.length - 1;
 
-    if (isLast) {
-      // Nothing follows: clear the row in place and wait at its price box.
+    if (rows.length <= MIN_ITEMS && isLast) {
+      // Minimum rows and last item: clear in place and wait at its price box.
       setFocusReq({ id: target.id, field: 'price' });
       if (isEmptyRow(target)) return;
       showToast(t.itemDeleted(itemLabel(index)), UNDO_MS, rows);
@@ -246,10 +272,10 @@ export default function App({ initial }: { initial: PersistedState }) {
   };
 
   // ---- menu -----------------------------------------------------------------------------------
-  const closeMenu = () => {
+  const closeMenu = useCallback(() => {
     setMenuOpen(false);
     window.requestAnimationFrame(() => menuBtnRef.current?.focus());
-  };
+  }, []);
 
   // ---- results --------------------------------------------------------------------------------
   const ranked = useMemo(() => rankItems(rows), [rows]);
@@ -277,7 +303,7 @@ export default function App({ initial }: { initial: PersistedState }) {
           <button
             type="button"
             className="version"
-            aria-label={t.versionAria(__APP_VERSION__)}
+            aria-label={needRefresh ? t.versionAriaUpdate(__APP_VERSION__) : t.versionAria(__APP_VERSION__)}
             aria-busy={checking}
             onClick={onVersionTap}
           >
@@ -292,7 +318,20 @@ export default function App({ initial }: { initial: PersistedState }) {
             <span className="colhead">{t.price}</span>
             <div className="seg" role="radiogroup" aria-label={t.unitLabel}>
               {(['g', 'ml'] as Unit[]).map((u) => (
-                <button key={u} type="button" role="radio" aria-checked={unit === u} onClick={() => setUnit(u)}>
+                <button
+                  key={u}
+                  type="button"
+                  role="radio"
+                  aria-checked={unit === u}
+                  tabIndex={unit === u ? 0 : -1}
+                  onClick={() => setUnit(u)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                      e.preventDefault();
+                      setUnit(unit === 'g' ? 'ml' : 'g');
+                    }
+                  }}
+                >
                   {u}
                 </button>
               ))}
@@ -407,16 +446,24 @@ export default function App({ initial }: { initial: PersistedState }) {
         <Menu t={t} lang={lang} theme={theme} onLang={setLang} onTheme={setTheme} onClose={closeMenu} />
       )}
 
-      {toast && (
-        <div className="toast" role="status" aria-live="polite" key={toast.seq}>
-          <span>{toast.text}</span>
-          {toast.undoRows && (
-            <button type="button" onClick={undo}>
-              {t.undo}
-            </button>
-          )}
-        </div>
-      )}
+      {/* Persistent live region container for screen reader announcements (F-006) */}
+      <div
+        className={`toast${toast ? '' : ' is-hidden'}`}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {toast && (
+          <>
+            <span>{toast.text}</span>
+            {toast.undoRows && (
+              <button type="button" onClick={undo}>
+                {t.undo}
+              </button>
+            )}
+          </>
+        )}
+      </div>
     </>
   );
 }
