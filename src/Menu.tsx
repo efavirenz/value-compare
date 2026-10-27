@@ -174,7 +174,10 @@ export default function Menu({ t, lang, theme, onLang, onTheme, onClose }: MenuP
                           if (el) themeRefs.current.set(th.id, el);
                           else themeRefs.current.delete(th.id);
                         }}
-                        onPick={() => onTheme(th.id)}
+                        onPick={() => {
+                          onTheme(th.id);
+                          onClose();
+                        }}
                       />
                     ))}
                 </div>

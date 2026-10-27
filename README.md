@@ -25,7 +25,7 @@ set `VITE_BASE=/your-repo-name/` for the build, or edit the default in `vite.con
 
 ## Releasing a new version
 
-- Bump `version` in `package.json`. The top-right badge shows major.minor only (`1.2.0` is shown as `v1.2`), so raise the minor number for releases users should see.
+- Bump `version` in `package.json`. The top-right badge shows major.minor only (`1.3.0` is shown as `v1.3`), so raise the minor number for releases users should see.
 - After deploying, tapping the version badge in the installed app checks for a new service worker
   and reloads into the latest version. If none exists it shows "You are on the latest version".
 
@@ -34,6 +34,11 @@ set `VITE_BASE=/your-repo-name/` for the build, or edit the default in `vite.con
 Open the site in Safari → Share → **Add to Home Screen**.
 
 ## Updates
+
+### v1.3.0 (v1.3)
+
+- **Menu & Theming UX**:
+  - Automatically close the hamburger menu drawer when a user taps any theme option, allowing immediate view of the newly applied theme on the comparison screen.
 
 ### v1.2.0 (v1.2)
 

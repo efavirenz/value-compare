@@ -160,13 +160,18 @@ describe('App', () => {
     expect(radios).toHaveLength(2 + 10); // EN/TH + 10 themes
   });
 
-  it('keeps focus on selected theme button after clicking it in Menu (F-003)', async () => {
+  it('closes menu automatically when any theme is tapped', async () => {
     const user = userEvent.setup();
     render(<App initial={defaultState()} />);
     await user.click(screen.getByRole('button', { name: 'Menu' }));
+    expect(screen.getByRole('dialog')).toBeTruthy();
+
     const midnightBtn = screen.getByRole('radio', { name: /Midnight|เที่ยงคืน/ });
     await user.click(midnightBtn);
-    expect(document.activeElement).toBe(midnightBtn);
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    const saved = JSON.parse(localStorage.getItem('value-compare:state:v1')!);
+    expect(saved.theme).toBe('midnight');
   });
 
   it('synchronizes state when receiving storage event from another tab (F-013)', async () => {
